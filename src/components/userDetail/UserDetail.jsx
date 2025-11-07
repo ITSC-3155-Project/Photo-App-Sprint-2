@@ -116,7 +116,7 @@
 
 
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Box, 
   Card, 
@@ -124,16 +124,14 @@ import {
   Typography, 
   Button,
   CircularProgress,
-  Divider,
   Chip,
   Avatar
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import WorkIcon from '@mui/icons-material/Work';
 import InfoIcon from '@mui/icons-material/Info';
-import FetchModel from '../../lib/fetchModelData';
+import FetchModel from '../../lib/fetchModelData';  
 
 function UserDetail() {
   const { userId } = useParams();
@@ -352,7 +350,7 @@ function UserDetail() {
               }
             }}
           >
-            View {user.first_name}'s Gallery
+            View {user.first_name}&apos;s Gallery
           </Button>
         </CardContent>
       </Card>

@@ -4,11 +4,13 @@
   "description": "Photo sharing application for Sprint 1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "server": "node server/webServer.js",
-    "start": "concurrently \"npm run server\" \"npm run dev\""
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "server": "node server/webServer.js",
+  "start": "concurrently \"npm run server\" \"npm run dev\"",
+  "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+  "lint:fix": "eslint . --ext js,jsx --fix"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -21,8 +23,12 @@
     "react-router-dom": "^6.20.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.0",
-    "concurrently": "^8.2.2",
-    "vite": "^7.1.12"
+  "@vitejs/plugin-react": "^4.2.0",
+  "concurrently": "^8.2.2",
+  "eslint": "^8.55.0",
+  "eslint-plugin-react": "^7.33.2",
+  "eslint-plugin-react-hooks": "^4.6.0",
+  "eslint-plugin-react-refresh": "^0.4.5",
+  "vite": "^7.1.12"
   }
 }

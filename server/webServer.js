@@ -487,6 +487,6 @@ app.get('/photosOfUser/:id', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Web server is running on http://localhost:${PORT}`);
-  console.log(`Test API at http://localhost:${PORT}/test/info`);
+  console.warn(`Web server is running on http://localhost:${PORT}`);
+  console.warn(`Test API at http://localhost:${PORT}/test/info`);
 });

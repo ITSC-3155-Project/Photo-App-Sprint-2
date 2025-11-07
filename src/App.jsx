@@ -49,8 +49,7 @@
 
 
 
-import React from 'react';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Box, Grid } from '@mui/material';
 import TopBar from './components/topBar/TopBar';
 import UserList from './components/userList/UserList';

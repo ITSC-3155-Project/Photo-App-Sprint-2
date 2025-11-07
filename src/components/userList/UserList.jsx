@@ -90,7 +90,7 @@
 
 
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   List, 
   ListItem, 
@@ -104,8 +104,7 @@ import {
   Chip
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import PersonIcon from '@mui/icons-material/Person';
-import FetchModel from '../../lib/fetchModelData';
+import FetchModel from '../../lib/fetchModelData';  
 
 function UserList() {
   const [users, setUsers] = useState([]);
@@ -189,7 +188,7 @@ function UserList() {
         />
       </ListItem>
       
-      {users.map((user, index) => (
+      {users.map((user) => (
         <ListItemButton
           key={user._id}
           selected={isUserSelected(user._id)}

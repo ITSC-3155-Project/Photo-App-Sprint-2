@@ -211,7 +211,7 @@
 
 
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -227,8 +227,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CommentIcon from '@mui/icons-material/Comment';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FetchModel from '../../lib/fetchModelData';
+import FetchModel from '../../lib/fetchModelData';  
 
 function UserPhotos() {
   const { userId } = useParams();
@@ -321,7 +320,7 @@ function UserPhotos() {
             letterSpacing: '-1px'
           }}
         >
-          {user?.first_name}'s Gallery
+          {user?.first_name}&apos;s Gallery
         </Typography>
         <Chip 
           label={`${photos.length} ${photos.length === 1 ? 'Photo' : 'Photos'}`}
@@ -335,7 +334,8 @@ function UserPhotos() {
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        {photos.map((photo, index) => (
+
+        {photos.map((photo) => (
           <Card 
             key={photo._id} 
             sx={{ 
