@@ -1,492 +1,225 @@
-// import express from 'express';
-// import path from 'path';
-// import { fileURLToPath } from 'url';
+cat > webServer.js << 'EOF'
+"use strict";
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+/**
+ * Photo App Sprint 2 web server.
+ * Uses MongoDB (project6) via Mongoose; no modelData.
+ */
 
-// const app = express();
-// const PORT = 3001;
+const mongoose = require("mongoose");
+mongoose.Promise = require("bluebird");
+mongoose.set("strictQuery", false);
 
-// // Mock Model Data
-// const models = {
-//   schemaInfo: () => ({
-//     _id: "schema1",
-//     __v: 1,
-//     load_date_time: new Date().toISOString()
-//   }),
-
-//   userListModel: () => [
-//     {
-//       _id: "1",
-//       first_name: "John",
-//       last_name: "Doe",
-//       location: "San Francisco, CA",
-//       description: "Photography enthusiast and software developer",
-//       occupation: "Software Engineer"
-//     },
-//     {
-//       _id: "2",
-//       first_name: "Jane",
-//       last_name: "Smith",
-//       location: "New York, NY",
-//       description: "Travel blogger and content creator",
-//       occupation: "Content Creator"
-//     },
-//     {
-//       _id: "3",
-//       first_name: "Mike",
-//       last_name: "Johnson",
-//       location: "Austin, TX",
-//       description: "Nature lover and wildlife photographer",
-//       occupation: "Photographer"
-//     },
-//     {
-//       _id: "4",
-//       first_name: "Sarah",
-//       last_name: "Williams",
-//       location: "Seattle, WA",
-//       description: "Urban explorer and designer",
-//       occupation: "Designer"
-//     }
-//   ],
-
-//   userModel: (userId) => {
-//     const users = models.userListModel();
-//     return users.find(u => u._id === userId);
-//   },
-
-//   photoOfUserModel: (userId) => {
-//     const users = models.userListModel();
-//     const photos = {
-//       "1": [
-//         {
-//           _id: "p1",
-//           user_id: "1",
-//           date_time: "2024-01-15T10:30:00",
-//           file_name: "photo1.jpg",
-//           comments: [
-//             {
-//               _id: "c1",
-//               photo_id: "p1",
-//               user: users[1],
-//               date_time: "2024-01-15T11:00:00",
-//               comment: "Amazing shot! The lighting is perfect."
-//             },
-//             {
-//               _id: "c2",
-//               photo_id: "p1",
-//               user: users[2],
-//               date_time: "2024-01-15T12:00:00",
-//               comment: "Love the composition and depth of field."
-//             }
-//           ]
-//         },
-//         {
-//           _id: "p2",
-//           user_id: "1",
-//           date_time: "2024-01-20T14:30:00",
-//           file_name: "photo2.jpg",
-//           comments: [
-//             {
-//               _id: "c3",
-//               photo_id: "p2",
-//               user: users[3],
-//               date_time: "2024-01-20T15:00:00",
-//               comment: "Beautiful colors! This is stunning."
-//             }
-//           ]
-//         }
-//       ],
-//       "2": [
-//         {
-//           _id: "p3",
-//           user_id: "2",
-//           date_time: "2024-02-01T09:00:00",
-//           file_name: "photo3.jpg",
-//           comments: [
-//             {
-//               _id: "c4",
-//               photo_id: "p3",
-//               user: users[0],
-//               date_time: "2024-02-01T10:00:00",
-//               comment: "Incredible travel photo! Where was this taken?"
-//             },
-//             {
-//               _id: "c5",
-//               photo_id: "p3",
-//               user: users[2],
-//               date_time: "2024-02-01T11:30:00",
-//               comment: "Awwwwww!"
-//             }
-//           ]
-//         },
-//         {
-//           _id: "p4",
-//           user_id: "2",
-//           date_time: "2024-02-05T16:00:00",
-//           file_name: "photo4.jpg",
-//           comments: []
-//         }
-//       ],
-//       "3": [
-//         {
-//           _id: "p5",
-//           user_id: "3",
-//           date_time: "2024-02-10T16:00:00",
-//           file_name: "photo5.jpg",
-//           comments: [
-//             {
-//               _id: "c6",
-//               photo_id: "p5",
-//               user: users[0],
-//               date_time: "2024-02-10T17:00:00",
-//               comment: "What a beautiful find. Great capture!"
-//             }
-//           ]
-//         },
-//         {
-//           _id: "p6",
-//           user_id: "3",
-//           date_time: "2024-02-12T08:00:00",
-//           file_name: "photo6.jpg",
-//           comments: [
-//             {
-//               _id: "c7",
-//               photo_id: "p6",
-//               user: users[1],
-//               date_time: "2024-02-12T09:00:00",
-//               comment: "The photography skills are impressive!"
-//             },
-//             {
-//               _id: "c8",
-//               photo_id: "p6",
-//               user: users[3],
-//               date_time: "2024-02-12T10:00:00",
-//               comment: "How did you get so close to capture this?"
-//             }
-//           ]
-//         }
-//       ],
-//       "4": [
-//         {
-//           _id: "p7",
-//           user_id: "4",
-//           date_time: "2024-02-15T13:00:00",
-//           file_name: "photo7.jpg",
-//           comments: [
-//             {
-//               _id: "c9",
-//               photo_id: "p7",
-//               user: users[0],
-//               date_time: "2024-02-15T14:00:00",
-//               comment: "Great urban perspective! Love the architecture."
-//             },
-//             {
-//               _id: "c10",
-//               photo_id: "p7",
-//               user: users[1],
-//               date_time: "2024-02-15T15:00:00",
-//               comment: "This is stunning! The city looks beautiful."
-//             }
-//           ]
-//         }
-//       ]
-//     };
-//     return photos[userId] || [];
-//   }
-// };
-
-// // Middleware
-// app.use(express.json());
-// app.use(express.static(path.join(__dirname, '../public')));
-
-// // Enable CORS for development
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', '*');
-//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-//   next();
-// });
-
-// // API Routes
-// app.get('/test/info', (req, res) => {
-//   const info = models.schemaInfo();
-//   res.json(info);
-// });
-
-// app.get('/user/list', (req, res) => {
-//   const users = models.userListModel();
-//   res.json(users);
-// });
-
-// app.get('/user/:id', (req, res) => {
-//   const user = models.userModel(req.params.id);
-//   if (user) {
-//     res.json(user);
-//   } else {
-//     res.status(404).json({ error: 'User not found' });
-//   }
-// });
-
-// app.get('/photosOfUser/:id', (req, res) => {
-//   const photos = models.photoOfUserModel(req.params.id);
-//   res.json(photos);
-// });
-
-// // Start server
-// app.listen(PORT, () => {
-//   console.log(`Web server is running on http://localhost:${PORT}`);
-//   console.log(`Test API at http://localhost:${PORT}/test/info`);
-// });
-
-
-
-
-
-
-
-
-
-
-
-
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+const async = require("async");
+const express = require("express");
 const app = express();
-const PORT = 3001;
 
-// Mock Model Data
-const models = {
-  schemaInfo: () => ({
-    _id: "schema1",
-    __v: 1,
-    load_date_time: new Date().toISOString()
-  }),
+// Load models from root
+const User = require("./user.js");
+const Photo = require("./photo.js");
+const SchemaInfo = require("./schemaInfo.js");
 
-  userListModel: () => [
-    {
-      _id: "1",
-      first_name: "John",
-      last_name: "Doe",
-      location: "San Francisco, CA",
-      description: "Photography enthusiast and software developer",
-      occupation: "Software Engineer"
-    },
-    {
-      _id: "2",
-      first_name: "Jane",
-      last_name: "Smith",
-      location: "New York, NY",
-      description: "Travel blogger and content creator",
-      occupation: "Content Creator"
-    },
-    {
-      _id: "3",
-      first_name: "Mike",
-      last_name: "Johnson",
-      location: "Austin, TX",
-      description: "Nature lover and wildlife photographer",
-      occupation: "Photographer"
-    },
-    {
-      _id: "4",
-      first_name: "Sarah",
-      last_name: "Williams",
-      location: "Seattle, WA",
-      description: "Urban explorer and designer",
-      occupation: "Designer"
-    }
-  ],
-
-  userModel: (userId) => {
-    const users = models.userListModel();
-    return users.find(u => u._id === userId);
-  },
-
-  photoOfUserModel: (userId) => {
-    const users = models.userListModel();
-    const photos = {
-      "1": [
-        {
-          _id: "p1",
-          user_id: "1",
-          date_time: "2024-01-15T10:30:00",
-          file_name: "photo1.jpg",
-          comments: [
-            {
-              _id: "c1",
-              photo_id: "p1",
-              user: users[1],
-              date_time: "2024-01-15T11:00:00",
-              comment: "Amazing shot! The lighting is perfect."
-            },
-            {
-              _id: "c2",
-              photo_id: "p1",
-              user: users[2],
-              date_time: "2024-01-15T12:00:00",
-              comment: "Love the composition and depth of field."
-            }
-          ]
-        },
-        {
-          _id: "p2",
-          user_id: "1",
-          date_time: "2024-01-20T14:30:00",
-          file_name: "photo2.jpg",
-          comments: [
-            {
-              _id: "c3",
-              photo_id: "p2",
-              user: users[3],
-              date_time: "2024-01-20T15:00:00",
-              comment: "Beautiful colors! This is stunning."
-            }
-          ]
-        }
-      ],
-      "2": [
-        {
-          _id: "p3",
-          user_id: "2",
-          date_time: "2024-02-01T09:00:00",
-          file_name: "photo3.jpg",
-          comments: [
-            {
-              _id: "c4",
-              photo_id: "p3",
-              user: users[0],
-              date_time: "2024-02-01T10:00:00",
-              comment: "Incredible travel photo! Where was this taken?"
-            },
-            {
-              _id: "c5",
-              photo_id: "p3",
-              user: users[2],
-              date_time: "2024-02-01T11:30:00",
-              comment: "This makes me want to travel right now!"
-            }
-          ]
-        },
-        {
-          _id: "p4",
-          user_id: "2",
-          date_time: "2024-02-05T16:00:00",
-          file_name: "photo4.jpg",
-          comments: []
-        }
-      ],
-      "3": [
-        {
-          _id: "p5",
-          user_id: "3",
-          date_time: "2024-02-10T16:00:00",
-          file_name: "photo5.jpg",
-          comments: [
-            {
-              _id: "c6",
-              photo_id: "p5",
-              user: users[0],
-              date_time: "2024-02-10T17:00:00",
-              comment: "Nature at its finest. Great capture!"
-            }
-          ]
-        },
-        {
-          _id: "p6",
-          user_id: "3",
-          date_time: "2024-02-12T08:00:00",
-          file_name: "photo6.jpg",
-          comments: [
-            {
-              _id: "c7",
-              photo_id: "p6",
-              user: users[1],
-              date_time: "2024-02-12T09:00:00",
-              comment: "The wildlife photography skills are impressive!"
-            },
-            {
-              _id: "c8",
-              photo_id: "p6",
-              user: users[3],
-              date_time: "2024-02-12T10:00:00",
-              comment: "How did you get so close to capture this?"
-            }
-          ]
-        }
-      ],
-      "4": [
-        {
-          _id: "p7",
-          user_id: "4",
-          date_time: "2024-02-15T13:00:00",
-          file_name: "photo7.jpg",
-          comments: [
-            {
-              _id: "c9",
-              photo_id: "p7",
-              user: users[0],
-              date_time: "2024-02-15T14:00:00",
-              comment: "Great urban perspective! Love the architecture."
-            },
-            {
-              _id: "c10",
-              photo_id: "p7",
-              user: users[1],
-              date_time: "2024-02-15T15:00:00",
-              comment: "This is stunning! The city looks beautiful."
-            }
-          ]
-        }
-      ]
-    };
-    return photos[userId] || [];
-  }
-};
-
-// Middleware
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '../public')));
-
-// Enable CORS for development
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
+// Connect to MongoDB
+mongoose.connect("mongodb://127.0.0.1/project6", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
-// API Routes
-app.get('/test/info', (req, res) => {
-  const info = models.schemaInfo();
-  res.json(info);
+// Serve static files from project root
+app.use(express.static(__dirname));
+
+app.get("/", (req, res) => {
+  res.send("Simple web server of files from " + __dirname);
 });
 
-app.get('/user/list', (req, res) => {
-  const users = models.userListModel();
-  res.json(users);
-});
+/**
+ * /test, /test/info, /test/counts
+ */
+app.get("/test/:p1?", (req, res) => {
+  const param = req.params.p1 || "info";
 
-app.get('/user/:id', (req, res) => {
-  const user = models.userModel(req.params.id);
-  if (user) {
-    res.json(user);
+  if (param === "info") {
+    SchemaInfo.find({}, (err, info) => {
+      if (err) {
+        res.status(500).send(JSON.stringify(err));
+        return;
+      }
+      if (!info || info.length === 0) {
+        res.status(500).send("Missing SchemaInfo");
+        return;
+      }
+      res.status(200).send(info[0]);
+    });
+  } else if (param === "counts") {
+    const collections = [
+      { name: "user", collection: User },
+      { name: "photo", collection: Photo },
+      { name: "schemaInfo", collection: SchemaInfo },
+    ];
+
+    async.each(
+      collections,
+      (col, done) => {
+        col.collection.countDocuments({}, (err, count) => {
+          col.count = count;
+          done(err);
+        });
+      },
+      (err) => {
+        if (err) {
+          res.status(500).send(JSON.stringify(err));
+          return;
+        }
+        const obj = {};
+        collections.forEach((c) => {
+          obj[c.name] = c.count;
+        });
+        res.status(200).send(obj);
+      }
+    );
   } else {
-    res.status(404).json({ error: 'User not found' });
+    res.status(400).send("Bad param " + param);
   }
 });
 
-app.get('/photosOfUser/:id', (req, res) => {
-  const photos = models.photoOfUserModel(req.params.id);
-  res.json(photos);
+/**
+ * GET /user/list
+ * Return [{ _id, first_name, last_name }]
+ */
+app.get("/user/list", (req, res) => {
+  User.find({}, "_id first_name last_name", (err, users) => {
+    if (err) {
+      res.status(500).send(JSON.stringify(err));
+      return;
+    }
+    res.status(200).send(
+      users.map((u) => ({
+        _id: u._id,
+        first_name: u.first_name,
+        last_name: u.last_name,
+      }))
+    );
+  });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.warn(`Web server is running on http://localhost:${PORT}`);
-  console.warn(`Test API at http://localhost:${PORT}/test/info`);
+/**
+ * GET /user/:id
+ * Return full user or 400 if invalid / not found.
+ */
+app.get("/user/:id", (req, res) => {
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).send("Not found");
+    return;
+  }
+
+  User.findById(id, (err, user) => {
+    if (err) {
+      res.status(500).send(JSON.stringify(err));
+      return;
+    }
+    if (!user) {
+      res.status(400).send("Not found");
+      return;
+    }
+    res.status(200).send({
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      location: user.location,
+      description: user.description,
+      occupation: user.occupation,
+    });
+  });
 });
+
+/**
+ * GET /photosOfUser/:id
+ * Return photos for user id, with comment.user populated.
+ */
+app.get("/photosOfUser/:id", (req, res) => {
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.status(400).send("Not found");
+    return;
+  }
+
+  User.findById(id, (err, user) => {
+    if (err) {
+      res.status(500).send(JSON.stringify(err));
+      return;
+    }
+    if (!user) {
+      res.status(400).send("Not found");
+      return;
+    }
+
+    Photo.find({ user_id: id })
+      .lean()
+      .exec((err, photos) => {
+        if (err) {
+          res.status(500).send(JSON.stringify(err));
+          return;
+        }
+
+        const commentUserIds = new Set();
+        photos.forEach((p) =>
+          (p.comments || []).forEach((c) => {
+            if (c.user_id) commentUserIds.add(String(c.user_id));
+          })
+        );
+
+        User.find(
+          { _id: { $in: Array.from(commentUserIds) } },
+          "_id first_name last_name",
+          (err, usersForComments) => {
+            if (err) {
+              res.status(500).send(JSON.stringify(err));
+              return;
+            }
+
+            const userMap = {};
+            usersForComments.forEach((u) => {
+              userMap[String(u._id)] = {
+                _id: u._id,
+                first_name: u.first_name,
+                last_name: u.last_name,
+              };
+            });
+
+            const responsePhotos = photos.map((p) => ({
+              _id: p._id,
+              file_name: p.file_name,
+              date_time: p.date_time,
+              user_id: p.user_id,
+              comments: (p.comments || []).map((c) => ({
+                _id: c._id,
+                comment: c.comment,
+                date_time: c.date_time,
+                user: userMap[String(c.user_id)],
+              })),
+            }));
+
+            if (responsePhotos.length === 0) {
+              res.status(400).send("Not found");
+            } else {
+              res.status(200).send(responsePhotos);
+            }
+          }
+        );
+      });
+  });
+});
+
+const server = app.listen(3000, () => {
+  const port = server.address().port;
+  console.log(
+    "Listening at http://localhost:" +
+      port +
+      " exporting the directory " +
+      __dirname
+  );
+});
+EOF
