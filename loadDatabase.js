@@ -1,4 +1,3 @@
-//FILE - loadDatabase.js
 "use strict";
 
 const mongoose = require("mongoose");
@@ -10,7 +9,7 @@ mongoose.connect("mongodb://127.0.0.1/project6", {
 });
 
 // Load the data and schema definitions
-const models = require('./photoApp.js').models;
+const models = require("./modelData/photoApp.js").models;
 const User = require("./user.js");
 const Photo = require("./photo.js");
 const SchemaInfo = require("./schemaInfo.js");
