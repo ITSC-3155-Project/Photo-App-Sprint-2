@@ -1,0 +1,13 @@
+/* TopBar general styling */
+
+header.MuiAppBar-root {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+header.MuiAppBar-root .MuiToolbar-root {
+  min-height: 64px;
+}
+
+header.MuiAppBar-root:hover {
+  transform: translateY(-1px);
+}
