@@ -131,7 +131,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import InfoIcon from '@mui/icons-material/Info';
-import FetchModel from '../../lib/fetchModelData';  
+import axios from 'axios';
 
 function UserDetail() {
   const { userId } = useParams();
@@ -141,20 +141,24 @@ function UserDetail() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    
-    FetchModel(`/user/${userId}`)
-      .then(response => {
+    const fetchUser = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await axios.get(`/user/${userId}`);
         setUser(response.data);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error('Error loading user details:', err);
         setError('Failed to load user details');
         setLoading(false);
-      });
+      }
+    };
+
+    fetchUser();
   }, [userId]);
+
 
   const handleViewPhotos = () => {
     navigate(`/photos/${userId}`);
