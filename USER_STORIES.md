@@ -222,3 +222,66 @@ As a developer, I need the project to have proper build tools, linting, formatti
 - Sprint Planning: [Date completed]
 - Sprint Review: [Date scheduled]
 - Sprint Retrospective: [Date scheduled]
+
+- ---
+
+## Sprint 2 – Database and Axios Stories
+### Story 8: Database – Persist Photo App Data in MongoDB
+
+**Title:** As a developer, I want the photo app data stored in MongoDB so that it persists across server restarts and behaves like a real full-stack app.
+
+**Description:**  
+As a developer on the photo sharing app, I need the users, photos, comments, and schema info to be stored in a MongoDB database using Mongoose schemas. The existing Express routes (`/test/info`, `/user/list`, `/user/:id`, `/photosOfUser/:id`) should read from the database instead of hard-coded model data.
+
+**Acceptance Criteria:**
+
+- MongoDB is running locally and can be connected to from `webServer.js` and `loadDatabase.js`.
+- Mongoose schemas are defined in:
+  - `schema/user.js`
+  - `schema/photo.js`
+  - `schema/schemaInfo.js`
+- `loadDatabase.js` populates the database with the starter photo app data.
+- `GET /test/info` returns the `SchemaInfo` document from MongoDB.
+- `GET /user/list` returns all users from the `User` collection (only `_id`, `first_name`, `last_name`).
+- `GET /user/:id` returns a single user document.
+- `GET /photosOfUser/:id` returns photos for that user, with embedded comment user objects populated.
+- No routes use the old mock `models` data anymore.
+- All database errors return a 500 with an informative JSON error message.
+
+**Technical Notes:**
+
+- Use Mongoose for schema definitions and queries.
+- Use `async`/`await` and `try/catch` in `webServer.js`.
+- Ensure MongoDB connection string is configured once and reused.
+
+**Size:** Large (5 story points)
+### Story 9: Axios – Fetch Models from Web Server
+
+**Title:** As a developer, I want the React front-end to use axios so that all model data is fetched via standard HTTP requests.
+
+**Description:**  
+As a photo sharing app developer, I want to replace the old `FetchModel` hack with axios so that all components use a consistent, modern HTTP client. The app should still behave the same to the user, but all model data should be loaded using axios from the Node/Express backend.
+
+**Acceptance Criteria:**
+
+- axios is installed and listed as a dependency in `package.json`.
+- Any remaining calls to `FetchModel` are removed or refactored.
+- `UserList`, `UserDetail`, `UserPhotos`, and `TopBar` fetch their data using axios:
+  - `GET /user/list`
+  - `GET /user/:id`
+  - `GET /photosOfUser/:id`
+  - `GET /test/info`
+- Components show:
+  - loading state while axios request is in flight,
+  - error state if the request fails.
+- No references to `window.models` remain anywhere in the React code.
+- The UI looks and behaves the same as before from a user perspective.
+
+**Technical Notes:**
+
+- Import with `import axios from 'axios';`.
+- Use `axios.get(url)` which returns a Promise.
+- Handle `.then` and `.catch` (or `async`/`await`) for success and error cases.
+- Consider extracting shared axios logic if needed.
+
+**Size:** Medium (3 story points)
