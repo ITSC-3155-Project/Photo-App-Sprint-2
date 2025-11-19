@@ -1,0 +1,15 @@
+/* UserDetail layout helpers */
+
+.user-detail-root {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.user-detail-root .MuiCard-root {
+  max-width: 960px;
+}
+
+.user-detail-root .MuiTypography-h3 {
+  word-break: break-word;
+}
