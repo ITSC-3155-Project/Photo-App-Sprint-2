@@ -1,0 +1,14 @@
+/* UserPhotos layout helpers */
+
+.user-photos-root {
+  padding: 24px;
+}
+
+.user-photos-root .MuiCard-root {
+  margin-bottom: 32px;
+}
+
+.user-photos-root img {
+  max-width: 100%;
+  display: block;
+}
