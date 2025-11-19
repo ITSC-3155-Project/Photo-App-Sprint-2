@@ -104,7 +104,7 @@ import {
   Chip
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import FetchModel from '../../lib/fetchModelData';  
+import axios from 'axios';
 
 function UserList() {
   const [users, setUsers] = useState([]);
@@ -113,18 +113,25 @@ function UserList() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    FetchModel('/user/list')
-      .then(response => {
+    useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await axios.get('/user/list');
         setUsers(response.data);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error('Error loading users:', err);
         setError('Failed to load users');
         setLoading(false);
-      });
+      }
+    };
+
+    fetchUsers();
   }, []);
+
 
   const handleUserClick = (userId) => {
     navigate(`/users/${userId}`);
