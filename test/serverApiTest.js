@@ -9,7 +9,7 @@
 
 const assert = require("assert");
 const request = require("supertest");
-const app = require("./webServer.js"); // uses the exported Express app
+const app = require("../webServer.js"); // uses the exported Express app
 
 // Give Mongo a little time to respond
 describe("Photo-App API", function () {
