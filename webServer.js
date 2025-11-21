@@ -212,6 +212,7 @@ app.get("/photosOfUser/:id", async (req, res) => {
 if (require.main === module) {
   const server = app.listen(3000, () => {
     const port = server.address().port;
+    // eslint-disable-next-line no-console
     console.log(
       "Listening at http://localhost:" +
         port +
