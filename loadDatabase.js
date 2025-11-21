@@ -1,6 +1,8 @@
 //FILE - loadDatabase.js
 "use strict";
 
+/* eslint-disable no-console */
+
 const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
 mongoose.set("strictQuery", false);
