@@ -1,12 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter } from "react-router-dom";
-import "./styles/main.css";
-import PhotoApp from "./components/photoShare/PhotoApp.jsx"; 
+import { HashRouter } from "react-router-dom";
+
+import "./src/index.css";          
+import App from "./src/App.jsx";   
 
 ReactDOM.render(
-  <BrowserRouter>
-    <PhotoApp />
-  </BrowserRouter>,
+  <HashRouter>
+    <App />
+  </HashRouter>,
   document.getElementById("photoshareapp")
 );
