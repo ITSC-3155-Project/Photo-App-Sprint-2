@@ -8,7 +8,7 @@
 const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
 mongoose.set("strictQuery", false);
-
+const path = require("path");
 const asyncLib = require("async");
 const express = require("express");
 const session = require("express-session");
