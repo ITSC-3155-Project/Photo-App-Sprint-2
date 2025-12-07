@@ -50,12 +50,15 @@ Promise.all(removePromises)
     const mapFakeId2RealId = {};
     const userPromises = userModels.map(function (user) {
       return User.create({
-        first_name: user.first_name,
-        last_name: user.last_name,
-        location: user.location,
-        description: user.description,
-        occupation: user.occupation,
-      })
+  first_name: user.first_name,
+  last_name: user.last_name,
+  location: user.location,
+  description: user.description,
+  occupation: user.occupation,
+  login_name: user.last_name.toLowerCase(),
+  password: "weak",
+})
+
         .then(function (userObj) {
           // Set the unique ID of the object. We use the MongoDB generated _id
           // for now but we keep it distinct from the MongoDB ID so we can go to
