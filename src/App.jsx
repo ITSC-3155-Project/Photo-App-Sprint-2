@@ -1,134 +1,82 @@
-// import React from 'react';
-// import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
-// import { Box, Grid } from '@mui/material';
-// import TopBar from './components/topBar/TopBar';
-// import UserList from './components/userList/UserList';
-// import UserDetail from './components/userDetail/UserDetail';
-// import UserPhotos from './components/userPhotos/UserPhotos';
+import React, { useState } from "react";
+import { Route, Switch, Redirect } from "react-router-dom";
 
-// function App() {
-//   return (
-//     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-//       <TopBar />
-//       <Grid container sx={{ flexGrow: 1, overflow: 'hidden', height: '100%' }}>
-//         <Grid item xs={3} sx={{ borderRight: 1, borderColor: 'divider', overflowY: 'auto', height: '100%' }}>
-//           <UserList />
-//         </Grid>
-//         <Grid item xs={9} sx={{ overflowY: 'auto', height: '100%', bgcolor: '#f5f5f5' }}>
-//           <Routes>
-//             <Route path="/" element={<WelcomeView />} />
-//             <Route path="/users" element={<WelcomeView />} />
-//             <Route path="/users/:userId" element={<UserDetail />} />
-//             <Route path="/photos/:userId" element={<UserPhotos />} />
-//           </Routes>
-//         </Grid>
-//       </Grid>
-//     </Box>
-//   );
-// }
+import "./styles/main.css";
 
-// function WelcomeView() {
-//   return (
-//     <Box 
-//       sx={{ 
-//         display: 'flex', 
-//         flexDirection: 'column',
-//         alignItems: 'center', 
-//         justifyContent: 'center', 
-//         height: '100%',
-//         color: 'text.secondary'
-//       }}
-//     >
-//       <Box sx={{ fontSize: 64, mb: 2 }}>📷</Box>
-//       <Box sx={{ fontSize: 24 }}>Select a user to view their profile</Box>
-//     </Box>
-//   );
-// }
+import TopBar from "./components/topBar/TopBar.jsx";
+import UserList from "./components/userList/userList.jsx";
+import UserDetail from "./components/userDetail/userDetail.jsx";
+import UserPhotos from "./components/userPhotos/userPhotos.jsx";
+import LoginRegister from "./components/loginRegister/loginRegister.jsx";
 
-// export default App;
-
-
-
-import { Routes, Route } from 'react-router-dom';
-import { Box, Grid } from '@mui/material';
-import TopBar from './components/topBar/TopBar';
-import UserList from './components/userList/UserList';
-import UserDetail from './components/userDetail/UserDetail';
-import UserPhotos from './components/userPhotos/UserPhotos';
-
+/**
+ * Root React component for the Photo App.
+ * The router is created in photoShare.jsx; here we just define routes.
+ */
 function App() {
-  return (
-    <Box sx={{ 
-      height: '100vh', 
-      display: 'flex', 
-      flexDirection: 'column',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    }}>
-      <TopBar />
-      <Grid container sx={{ flexGrow: 1, overflow: 'hidden', height: '100%' }}>
-        <Grid item xs={3} sx={{ 
-          borderRight: 1, 
-          borderColor: 'rgba(255,255,255,0.1)', 
-          overflowY: 'auto', 
-          height: '100%',
-          background: 'rgba(255,255,255,0.95)',
-          backdropFilter: 'blur(10px)'
-        }}>
-          <UserList />
-        </Grid>
-        <Grid item xs={9} sx={{ 
-          overflowY: 'auto', 
-          height: '100%', 
-          background: 'rgba(255,255,255,0.9)',
-          backdropFilter: 'blur(20px)'
-        }}>
-          <Routes>
-            <Route path="/" element={<WelcomeView />} />
-            <Route path="/users" element={<WelcomeView />} />
-            <Route path="/users/:userId" element={<UserDetail />} />
-            <Route path="/photos/:userId" element={<UserPhotos />} />
-          </Routes>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-}
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
-function WelcomeView() {
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        height: '100%',
-        color: 'text.secondary'
-      }}
-    >
-      <Box sx={{ 
-        fontSize: 80, 
-        mb: 3,
-        filter: 'drop-shadow(0 4px 20px rgba(102, 126, 234, 0.4))',
-        animation: 'float 3s ease-in-out infinite',
-        '@keyframes float': {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-20px)' }
-        }
-      }}>
-        📷
-      </Box>
-      <Box sx={{ 
-        fontSize: 28, 
-        fontWeight: 300,
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text'
-      }}>
-        Select a user to explore their world
-      </Box>
-    </Box>
+    <div className="cs142-main">
+      {/* Top toolbar always visible */}
+      <TopBar
+        loggedInUser={loggedInUser}
+        setLoggedInUser={setLoggedInUser}
+      />
+
+      <div className="cs142-content">
+        <Switch>
+          {/* Login / registration page – always reachable */}
+          <Route path="/login-register">
+            <LoginRegister setLoggedInUser={setLoggedInUser} />
+          </Route>
+
+          {/* Everything below here requires a logged-in user */}
+          {loggedInUser ? (
+            <>
+              <Route path="/users/:userId">
+                <div className="cs142-main-content">
+                  <div className="cs142-left-pane">
+                    <UserList />
+                  </div>
+                  <div className="cs142-right-pane">
+                    <UserDetail />
+                  </div>
+                </div>
+              </Route>
+
+              <Route path="/photos/:userId">
+                <div className="cs142-main-content">
+                  <div className="cs142-left-pane">
+                    <UserList />
+                  </div>
+                  <div className="cs142-right-pane">
+                    <UserPhotos />
+                  </div>
+                </div>
+              </Route>
+
+              <Route path="/users">
+                <div className="cs142-main-content">
+                  <div className="cs142-left-pane">
+                    <UserList />
+                  </div>
+                  <div className="cs142-right-pane">
+                    <div>Please select a user.</div>
+                  </div>
+                </div>
+              </Route>
+
+              {/* default route when logged in: go to own user page */}
+              <Redirect to={`/users/${loggedInUser._id}`} />
+            </>
+          ) : (
+            // If not logged in, force them to the login/register view
+            <Redirect to="/login-register" />
+          )}
+        </Switch>
+      </div>
+    </div>
   );
 }
 
