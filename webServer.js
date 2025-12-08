@@ -33,19 +33,22 @@ mongoose.connect("mongodb://127.0.0.1/project6", {
   useUnifiedTopology: true,
 });
 
-// Serve static files from the project root directory
+// Serve static files
+app.use("/compiled", express.static(path.join(__dirname, "compiled")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(express.static(__dirname));
 
 // Sessions and JSON body parsing
 app.use(
   session({
-    secret: "someSecretKey", // change to any string
+    secret: "someSecretKey",
     resave: false,
     saveUninitialized: false,
   })
 );
 
 app.use(bodyParser.json());
+
 
 // Auth middleware: require login for API endpoints, but allow static files.
 const protectedPrefixes = [
