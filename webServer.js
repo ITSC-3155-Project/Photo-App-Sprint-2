@@ -405,36 +405,46 @@ app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
 
 /**
  * POST /photos/new
- * Uploads a photo for the current user.
+ * Upload a photo for the current user.
  * Body: multipart/form-data with field 'uploadedphoto'.
  */
 app.post("/photos/new", (request, response) => {
-  processFormBody(request, response, async function (err) {
+  processFormBody(request, response, (err) => {
     if (err || !request.file) {
-      return response.status(400).send("No file uploaded");
+      console.error("Multer error or no file:", err);
+      response.status(400).send("No file uploaded");
+      return;
     }
 
-    try {
-      const timestamp = new Date().valueOf();
-      const filename = "U" + String(timestamp) + request.file.originalname;
+    const timestamp = new Date().valueOf();
+    const filename = `U${timestamp}${request.file.originalname}`;
+    const filePath = path.join(__dirname, "images", filename);
 
-      await fs.promises.writeFile("./images/" + filename, request.file.buffer);
+    fs.writeFile(filePath, request.file.buffer, async (writeErr) => {
+      if (writeErr) {
+        console.error("Error writing uploaded file:", writeErr);
+        response.status(500).send(JSON.stringify(writeErr));
+        return;
+      }
 
-      const newPhoto = new Photo({
-        file_name: filename,
-        date_time: new Date(),
-        user_id: request.session.user_id,
-        comments: [],
-      });
+      try {
+        const newPhoto = new Photo({
+          file_name: filename,
+          date_time: new Date(),
+          user_id: request.session.user_id,
+          comments: [],
+        });
 
-      const savedPhoto = await newPhoto.save();
-      response.status(200).send(savedPhoto);
-    } catch (e) {
-      console.error("Error in /photos/new:", e);
-      response.status(500).send(JSON.stringify(e));
-    }
+        const savedPhoto = await newPhoto.save();
+        response.status(200).send(savedPhoto);
+      } catch (dbErr) {
+        console.error("Error saving Photo document:", dbErr);
+        response.status(500).send(JSON.stringify(dbErr));
+      }
+    });
   });
 });
+
 
 // Start the server ONLY when running this file directly.
 // When required by Mocha tests, no server is started.
