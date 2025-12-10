@@ -44,8 +44,27 @@ Now the application detects links inside comment text and automatically converts
 To test, add a comment such as https://www.youtube.com/watch?v=KEl5Gi9l528
 The link will appear highlighted and will open in a new tab.
 
+Story number and name:
+11 – Count Bubbles
+
+Story points:
+4
+
+Brief description to see the story in action:
+The user list now shows two count bubbles next to each user:
+• Green bubble: number of photos the user has uploaded
+• Red bubble: number of comments the user has authored
+
+Clicking the red comment bubble loads a new page showing all comments written by that user.
+Each comment displays:
+• A thumbnail of the photo it was posted on
+• The text of the comment
+• The comment timestamp
+
+Clicking on any item in the list navigates to that photo’s detail view (or its containing photo list) so the grader can confirm correct linking.
+
 Total Story Points:
-6
+10
 
 
 Any special instructions for grading:
