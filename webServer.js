@@ -54,7 +54,7 @@ const protectedPrefixes = [
   "/user",
   "/photosOfUser",
   "/commentsOfPhoto",
-  "/commentsOfUser",   // NEW: protect comments feed
+  "/commentsOfUser", // NEW: protect comments feed
   "/photos",
   "/test",
 ];
@@ -244,7 +244,7 @@ app.post("/user", async (request, response) => {
     return response.status(400).send("Required fields missing");
   }
 
-  try:
+  try {
     const existing = await User.findOne({ login_name }).exec();
     if (existing) {
       return response.status(400).send("Login name already exists");
@@ -507,54 +507,42 @@ app.post("/commentsOfPhoto/:photo_id", async (request, response) => {
  * Upload a photo for the current user.
  * Body: multipart/form-data with field 'uploadedphoto'.
  */
-/**
- * POST /user
- * Registration.
- * Body: { login_name, password, first_name, last_name, location, description, occupation }
- */
-app.post("/user", async (request, response) => {
-  const {
-    login_name,
-    password,
-    first_name,
-    last_name,
-    location,
-    description,
-    occupation,
-  } = request.body || {};
-
-  if (!login_name || !first_name || !last_name || !password) {
-    return response.status(400).send("Required fields missing");
-  }
-
-  try {
-    const existing = await User.findOne({ login_name }).exec();
-    if (existing) {
-      return response.status(400).send("Login name already exists");
+app.post("/photos/new", (request, response) => {
+  processFormBody(request, response, (err) => {
+    if (err || !request.file) {
+      console.error("Multer error or no file:", err);
+      response.status(400).send("No file uploaded");
+      return;
     }
 
-    const user = new User({
-      login_name,
-      password,
-      first_name,
-      last_name,
-      location,
-      description,
-      occupation,
-    });
+    const timestamp = new Date().valueOf();
+    const filename = `U${timestamp}${request.file.originalname}`;
+    const filePath = path.join(__dirname, "images", filename);
 
-    const savedUser = await user.save();
-    response.status(200).send({
-      _id: savedUser._id,
-      first_name: savedUser.first_name,
-      last_name: savedUser.last_name,
+    fs.writeFile(filePath, request.file.buffer, async (writeErr) => {
+      if (writeErr) {
+        console.error("Error writing uploaded file:", writeErr);
+        response.status(500).send(JSON.stringify(writeErr));
+        return;
+      }
+
+      try {
+        const newPhoto = new Photo({
+          file_name: filename,
+          date_time: new Date(),
+          user_id: request.session.user_id,
+          comments: [],
+        });
+
+        const savedPhoto = await newPhoto.save();
+        response.status(200).send(savedPhoto);
+      } catch (dbErr) {
+        console.error("Error saving Photo document:", dbErr);
+        response.status(500).send(JSON.stringify(dbErr));
+      }
     });
-  } catch (err) {
-    console.error("Error in /user:", err);
-    response.status(500).send(JSON.stringify(err));
-  }
+  });
 });
-
 
 // Start the server ONLY when running this file directly.
 // When required by Mocha tests, no server is started.
