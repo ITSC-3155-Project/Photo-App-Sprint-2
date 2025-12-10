@@ -1,0 +1,38 @@
+Story number and name:
+13 – Login and Browser Refresh
+
+Story points:
+3
+
+Brief description to see the story in action:
+Log in with any valid user.
+Refresh the browser (⌘R / Ctrl+R).
+The app remains logged in and restores the correct route.
+This works by adding a /current-user endpoint on the backend and a React-side bootstrap check that rehydrates login state after refresh.
+
+Story number and name:
+17 – Bug: Browser Refresh Logs User Out
+
+Story points:
+1
+
+Brief description to see the story in action:
+Previously, refreshing the browser always logged the user out because the application stored login state only in React memory.
+Now, after logging in, refreshing the browser keeps the user logged in and the app loads normally without redirecting to the login page.
+This bug is fixed as part of the login refresh persistence logic.
+
+Total Story Points:
+4
+
+Any special instructions for grading:
+The project runs using:
+
+mongod
+
+npm install
+
+npm run build
+
+node loadDatabase.js
+
+node webServer.js
