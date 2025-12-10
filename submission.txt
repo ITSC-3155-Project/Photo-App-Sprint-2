@@ -10,7 +10,6 @@ Refresh the browser (⌘R / Ctrl+R).
 The app remains logged in and restores the correct route.
 This works by adding a /current-user endpoint on the backend and a React-side bootstrap check that rehydrates login state after refresh.
 
-
 Story number and name:
 17 – Bug: Browser Refresh Logs User Out
 
@@ -21,7 +20,6 @@ Brief description to see the story in action:
 Previously, refreshing the browser always logged the user out because the application stored login state only in React memory.
 Now, after logging in, refreshing the browser keeps the user logged in and the app loads normally without redirecting to the login page.
 This bug is fixed as part of the login refresh persistence logic.
-
 
 Story number and name:
 15 – Bug: First Login Attempt Always Fails
@@ -34,9 +32,20 @@ This bug was tested across multiple login attempts and confirmed not to occur in
 The login handler correctly authenticates users on the first attempt with no changes required.
 This story is completed by validating correct behavior and ensuring compatibility with the rest of the login system.
 
+Story number and name:
+16 – Bug: Link in Comments Doesn’t Work
+
+Story points:
+1
+
+Brief description to see the story in action:
+Previously, URLs typed in comments were not clickable.
+Now the application detects links inside comment text and automatically converts them into clickable anchors.
+To test, add a comment such as https://www.youtube.com/watch?v=KEl5Gi9l528
+The link will appear highlighted and will open in a new tab.
 
 Total Story Points:
-5
+6
 
 
 Any special instructions for grading:
