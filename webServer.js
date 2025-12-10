@@ -49,7 +49,6 @@ app.use(
 
 app.use(bodyParser.json());
 
-
 // Auth middleware: require login for API endpoints, but allow static files.
 const protectedPrefixes = [
   "/user",
@@ -84,8 +83,6 @@ app.use((request, response, next) => {
 
   return next();
 });
-
-
 
 /**
  * Root – just a simple message; not used by the React app/tests.
@@ -195,6 +192,35 @@ app.post("/admin/logout", (request, response) => {
     }
     response.status(200).send("Logged out");
   });
+});
+
+/**
+ * GET /current-user
+ * Returns the currently logged-in user based on the session cookie.
+ * 200: { _id, first_name, last_name, login_name }
+ * 401: if no user is logged in
+ */
+app.get("/current-user", async (request, response) => {
+  if (!request.session.user_id) {
+    return response.status(401).send("No current user");
+  }
+
+  try {
+    const user = await User.findById(request.session.user_id).exec();
+    if (!user) {
+      return response.status(400).send("User not found");
+    }
+
+    response.status(200).send({
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      login_name: user.login_name,
+    });
+  } catch (err) {
+    console.error("Error in /current-user:", err);
+    response.status(500).send(JSON.stringify(err));
+  }
 });
 
 /**
@@ -445,7 +471,6 @@ app.post("/photos/new", (request, response) => {
   });
 });
 
-
 // Start the server ONLY when running this file directly.
 // When required by Mocha tests, no server is started.
 if (require.main === module) {
@@ -462,4 +487,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-
