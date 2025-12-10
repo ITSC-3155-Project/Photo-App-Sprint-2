@@ -1,7 +1,8 @@
 // src/App.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Grid } from "@mui/material";
+import axios from "axios";
 
 import TopBar from "./components/topBar/TopBar.jsx";
 import UserList from "./components/userList/userList.jsx";
@@ -11,6 +12,7 @@ import LoginRegister from "./components/loginRegister/loginRegister.jsx";
 
 function App() {
   const [loggedInUser, setLoggedInUser] = useState(null);
+  const [checkedSession, setCheckedSession] = useState(false);
 
   const isLoggedIn = !!loggedInUser;
 
@@ -21,6 +23,29 @@ function App() {
   const handleLogout = () => {
     setLoggedInUser(null);
   };
+
+  // --- NEW: check existing session on first load / refresh ---
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await axios.get("/current-user");
+        // if cookie/session is valid, this will return the user
+        setLoggedInUser(response.data);
+      } catch (err) {
+        // likely 401 "No current user" – just treat as logged out
+        setLoggedInUser(null);
+      } finally {
+        setCheckedSession(true);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  // Optionally: while we’re checking the session, don’t render routes yet
+  if (!checkedSession) {
+    return null; // or a small loading spinner if you prefer
+  }
 
   return (
     <div>
