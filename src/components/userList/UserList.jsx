@@ -1,255 +1,152 @@
-// import React, { useEffect, useState } from 'react';
-// import { 
-//   List, 
-//   ListItem, 
-//   ListItemButton, 
-//   ListItemText, 
-//   Divider,
-//   Typography,
-//   CircularProgress,
-//   Box 
-// } from '@mui/material';
-// import { useNavigate, useLocation } from 'react-router-dom';
-// import FetchModel from '../../lib/fetchModelData';
-
-// function UserList() {
-//   const [users, setUsers] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const navigate = useNavigate();
-//   const location = useLocation();
-
-//   useEffect(() => {
-//     FetchModel('/user/list')
-//       .then(response => {
-//         setUsers(response.data);
-//         setLoading(false);
-//       })
-//       .catch(err => {
-//         console.error('Error loading users:', err);
-//         setError('Failed to load users');
-//         setLoading(false);
-//       });
-//   }, []);
-
-//   const handleUserClick = (userId) => {
-//     navigate(`/users/${userId}`);
-//   };
-
-//   const isUserSelected = (userId) => {
-//     return location.pathname.includes(userId);
-//   };
-
-//   if (loading) {
-//     return (
-//       <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-//         <CircularProgress />
-//       </Box>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <Box sx={{ p: 3, color: 'error.main' }}>
-//         <Typography>{error}</Typography>
-//       </Box>
-//     );
-//   }
-
-//   return (
-//     <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-//       <ListItem sx={{ bgcolor: 'grey.200' }}>
-//         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-//           Users
-//         </Typography>
-//       </ListItem>
-//       <Divider />
-//       {users.map((user) => (
-//         <React.Fragment key={user._id}>
-//           <ListItemButton
-//             selected={isUserSelected(user._id)}
-//             onClick={() => handleUserClick(user._id)}
-//           >
-//             <ListItemText 
-//               primary={`${user.first_name} ${user.last_name}`}
-//               primaryTypographyProps={{ fontWeight: 'medium' }}
-//             />
-//           </ListItemButton>
-//           <Divider />
-//         </React.Fragment>
-//       ))}
-//     </List>
-//   );
-// }
-
-// export default UserList;
-
-
-
-
-
-
-
-import React, { useEffect, useState } from 'react';
-import { 
-  List, 
-  ListItem, 
-  ListItemButton, 
-  ListItemText, 
+// src/components/userList/userList.jsx
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  List,
+  ListItemButton,
+  ListItemText,
   ListItemAvatar,
   Avatar,
   Typography,
-  CircularProgress,
-  Box,
-  Chip
-} from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+  Badge
+} from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function UserList() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [userCounts, setUserCounts] = useState({}); // { userId: { photoCount, commentCount } }
   const [error, setError] = useState(null);
+
   const navigate = useNavigate();
   const location = useLocation();
 
-    useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
+  useEffect(() => {
+    const fetchUsersAndCounts = async () => {
       setError(null);
-
       try {
-        const response = await axios.get('/user/list');
-        setUsers(response.data);
-        setLoading(false);
+        const [usersRes, countsRes] = await Promise.all([
+          axios.get("/user/list"),
+          axios.get("/user/counts")
+        ]);
+
+        setUsers(usersRes.data);
+        setUserCounts(countsRes.data || {});
       } catch (err) {
-        console.error('Error loading users:', err);
-        setError('Failed to load users');
-        setLoading(false);
+        console.error("Error loading users or counts:", err);
+        setError("Failed to load user list");
       }
     };
 
-    fetchUsers();
+    fetchUsersAndCounts();
   }, []);
 
+  const getInitials = (firstName, lastName) => {
+    if (!firstName || !lastName) return "?";
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  };
 
   const handleUserClick = (userId) => {
     navigate(`/users/${userId}`);
   };
 
-  const isUserSelected = (userId) => {
-    return location.pathname.includes(userId);
+  const getSelectedUserIdFromPath = () => {
+    const parts = location.pathname.split("/");
+    if (parts[1] === "users" && parts[2]) {
+      return parts[2];
+    }
+    if (parts[1] === "photos" && parts[2]) {
+      return parts[2];
+    }
+    return null;
   };
 
-  const getInitials = (firstName, lastName) => {
-    return `${firstName[0]}${lastName[0]}`.toUpperCase();
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <CircularProgress sx={{ color: '#667eea' }} />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3, color: 'error.main' }}>
-        <Typography>{error}</Typography>
-      </Box>
-    );
-  }
+  const selectedUserId = getSelectedUserIdFromPath();
 
   return (
-    <List sx={{ width: '100%', bgcolor: 'transparent', p: 0 }}>
-      <ListItem sx={{ 
-        bgcolor: 'transparent',
-        py: 2.5,
-        borderBottom: '1px solid rgba(0,0,0,0.08)'
-      }}>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            fontWeight: 700,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            letterSpacing: '-0.5px'
-          }}
-        >
-          Community
+    <Box
+      sx={{
+        height: "100vh",
+        borderRight: "1px solid rgba(0,0,0,0.08)",
+        background: "linear-gradient(180deg, #f5f7ff 0%, #ffffff 60%)",
+        p: 2
+      }}
+    >
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: 700,
+          mb: 2,
+          textTransform: "uppercase",
+          fontSize: "0.8rem",
+          letterSpacing: "0.12em",
+          color: "text.secondary"
+        }}
+      >
+        Photographers
+      </Typography>
+
+      {error ? (
+        <Typography color="error" variant="body2">
+          {error}
         </Typography>
-        <Chip 
-          label={users.length}
-          size="small"
-          sx={{
-            ml: 1.5,
-            height: 20,
-            fontSize: '0.7rem',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            fontWeight: 600
-          }}
-        />
-      </ListItem>
-      
-      {users.map((user) => (
-        <ListItemButton
-          key={user._id}
-          selected={isUserSelected(user._id)}
-          onClick={() => handleUserClick(user._id)}
-          sx={{
-            py: 2,
-            px: 2.5,
-            mb: 0.5,
-            mx: 1,
-            borderRadius: 2,
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-              transform: 'translateX(5px)',
-              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.15)'
-            },
-            '&.Mui-selected': {
-              background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%)',
-              borderLeft: '3px solid #667eea',
-              '&:hover': {
-                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)',
-              }
-            }
-          }}
-        >
-          <ListItemAvatar>
-            <Avatar 
-              sx={{ 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                fontWeight: 600,
-                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-              }}
-            >
-              {getInitials(user.first_name, user.last_name)}
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText 
-            primary={`${user.first_name} ${user.last_name}`}
-            secondary={user.occupation}
-            primaryTypographyProps={{ 
-              fontWeight: 600,
-              fontSize: '0.95rem'
-            }}
-            secondaryTypographyProps={{
-              fontSize: '0.8rem',
-              sx: { 
-                mt: 0.3,
-                color: 'text.secondary'
-              }
-            }}
-          />
-        </ListItemButton>
-      ))}
-    </List>
+      ) : (
+        <List dense sx={{ overflowY: "auto", maxHeight: "calc(100vh - 80px)" }}>
+          {users.map((user) => {
+            const counts = userCounts[user._id] || {
+              photoCount: 0,
+              commentCount: 0
+            };
+
+            const isSelected = selectedUserId === String(user._id);
+
+            return (
+              <ListItemButton
+                key={user._id}
+                selected={isSelected}
+                onClick={() => handleUserClick(user._id)}
+                sx={{
+                  borderRadius: 2,
+                  mb: 0.5,
+                  "&.Mui-selected": {
+                    background:
+                      "linear-gradient(90deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12))"
+                  }
+                }}
+              >
+                <ListItemAvatar>
+                  <Avatar
+                    sx={{
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      fontSize: 12
+                    }}
+                  >
+                    {getInitials(user.first_name, user.last_name)}
+                  </Avatar>
+                </ListItemAvatar>
+
+                <ListItemText
+                  primary={`${user.first_name} ${user.last_name}`}
+                  primaryTypographyProps={{
+                    fontSize: "0.95rem",
+                    fontWeight: isSelected ? 700 : 500
+                  }}
+                />
+
+                {/* Count Bubble – total photos for this user */}
+                <Badge
+                  badgeContent={counts.photoCount}
+                  color="primary"
+                  showZero
+                  sx={{ "& .MuiBadge-badge": { fontSize: "0.65rem" } }}
+                />
+              </ListItemButton>
+            );
+          })}
+        </List>
+      )}
+    </Box>
   );
 }
 
