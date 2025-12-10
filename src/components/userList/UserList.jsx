@@ -8,37 +8,32 @@ import {
   ListItemAvatar,
   Avatar,
   Typography,
-  Badge
+  Chip
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function UserList() {
   const [users, setUsers] = useState([]);
-  const [userCounts, setUserCounts] = useState({}); // { userId: { photoCount, commentCount } }
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const fetchUsersAndCounts = async () => {
+    const fetchUsers = async () => {
       setError(null);
       try {
-        const [usersRes, countsRes] = await Promise.all([
-          axios.get("/user/list"),
-          axios.get("/user/counts")
-        ]);
-
+        // /user/list now returns photoCount + commentCount on each user
+        const usersRes = await axios.get("/user/list");
         setUsers(usersRes.data);
-        setUserCounts(countsRes.data || {});
       } catch (err) {
-        console.error("Error loading users or counts:", err);
+        console.error("Error loading users:", err);
         setError("Failed to load user list");
       }
     };
 
-    fetchUsersAndCounts();
+    fetchUsers();
   }, []);
 
   const getInitials = (firstName, lastName) => {
@@ -50,12 +45,24 @@ function UserList() {
     navigate(`/users/${userId}`);
   };
 
+  const handleCommentBubbleClick = (event, userId) => {
+    // don’t trigger the row’s onClick
+    event.stopPropagation();
+    navigate(`/comments/${userId}`);
+  };
+
   const getSelectedUserIdFromPath = () => {
     const parts = location.pathname.split("/");
+    // /users/:id
     if (parts[1] === "users" && parts[2]) {
       return parts[2];
     }
+    // /photos/:id
     if (parts[1] === "photos" && parts[2]) {
+      return parts[2];
+    }
+    // /comments/:id (new view for count bubbles story)
+    if (parts[1] === "comments" && parts[2]) {
       return parts[2];
     }
     return null;
@@ -93,11 +100,8 @@ function UserList() {
       ) : (
         <List dense sx={{ overflowY: "auto", maxHeight: "calc(100vh - 80px)" }}>
           {users.map((user) => {
-            const counts = userCounts[user._id] || {
-              photoCount: 0,
-              commentCount: 0
-            };
-
+            const photoCount = user.photoCount ?? 0;
+            const commentCount = user.commentCount ?? 0;
             const isSelected = selectedUserId === String(user._id);
 
             return (
@@ -134,13 +138,24 @@ function UserList() {
                   }}
                 />
 
-                {/* Count Bubble – total photos for this user */}
-                <Badge
-                  badgeContent={counts.photoCount}
-                  color="primary"
-                  showZero
-                  sx={{ "& .MuiBadge-badge": { fontSize: "0.65rem" } }}
-                />
+                {/* Two count bubbles: green = photos, red = comments */}
+                <Box sx={{ display: "flex", gap: 0.5 }}>
+                  {/* Photo count (green) */}
+                  <Chip
+                    label={photoCount}
+                    size="small"
+                    color="success"
+                    sx={{ minWidth: 28, fontWeight: 600 }}
+                  />
+                  {/* Comment count (red, clickable) */}
+                  <Chip
+                    label={commentCount}
+                    size="small"
+                    color="error"
+                    sx={{ minWidth: 28, fontWeight: 600 }}
+                    onClick={(e) => handleCommentBubbleClick(e, user._id)}
+                  />
+                </Box>
               </ListItemButton>
             );
           })}
