@@ -27,7 +27,7 @@ Total Story Points:
 Any special instructions for grading:
 The project runs using:
 
-mongod
+mongod --dbpath /usr/local/var/mongodb
 
 npm install
 
