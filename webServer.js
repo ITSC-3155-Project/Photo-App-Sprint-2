@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Photo App Sprint 3 web server.
+ * Photo App Sprint 3/4 web server.
  * Uses MongoDB (project6) via Mongoose v7+ (async/await, no callbacks).
  */
 
@@ -54,6 +54,7 @@ const protectedPrefixes = [
   "/user",
   "/photosOfUser",
   "/commentsOfPhoto",
+  "/commentsOfUser",   // NEW: protect comments feed
   "/photos",
   "/test",
 ];
@@ -243,7 +244,7 @@ app.post("/user", async (request, response) => {
     return response.status(400).send("Required fields missing");
   }
 
-  try {
+  try:
     const existing = await User.findOne({ login_name }).exec();
     if (existing) {
       return response.status(400).send("Login name already exists");
@@ -273,50 +274,51 @@ app.post("/user", async (request, response) => {
 
 /**
  * GET /user/list
- * -> [{ _id, first_name, last_name }]
+ * -> [{ _id, first_name, last_name, photoCount, commentCount }]
  */
 app.get("/user/list", async (req, res) => {
   try {
-    const users = await User.find({}, "first_name last_name").exec();
-    const result = users.map((u) => ({
-      _id: u._id,
-      first_name: u.first_name,
-      last_name: u.last_name,
-    }));
+    // base users
+    const users = await User.find({}, "first_name last_name").lean().exec();
+
+    // photo counts per user
+    const photoCounts = await Photo.aggregate([
+      { $group: { _id: "$user_id", count: { $sum: 1 } } },
+    ]).exec();
+
+    // comment counts per user (unwind comments)
+    const commentCounts = await Photo.aggregate([
+      { $unwind: "$comments" },
+      { $group: { _id: "$comments.user_id", count: { $sum: 1 } } },
+    ]).exec();
+
+    const photoCountMap = {};
+    photoCounts.forEach((pc) => {
+      photoCountMap[String(pc._id)] = pc.count;
+    });
+
+    const commentCountMap = {};
+    commentCounts.forEach((cc) => {
+      commentCountMap[String(cc._id)] = cc.count;
+    });
+
+    const result = users.map((u) => {
+      const idStr = String(u._id);
+      return {
+        _id: u._id,
+        first_name: u.first_name,
+        last_name: u.last_name,
+        photoCount: photoCountMap[idStr] || 0,
+        commentCount: commentCountMap[idStr] || 0,
+      };
+    });
+
     res.status(200).send(result);
   } catch (err) {
     console.error("Error in /user/list:", err);
     res.status(500).send(JSON.stringify(err));
   }
 });
-
-/** ------------- NEW ROUTE FOR COUNT BUBBLES ------------- */
-/**
- * GET /user/counts
- * -> map of userId -> { photoCount, commentCount }
- * Used for "Count Bubbles" in the sidebar.
- */
-app.get("/user/counts", async (request, response) => {
-  try {
-    const photos = await Photo.find({}).lean().exec();
-
-    const counts = {};
-    photos.forEach((p) => {
-      const key = String(p.user_id);
-      if (!counts[key]) {
-        counts[key] = { photoCount: 0, commentCount: 0 };
-      }
-      counts[key].photoCount += 1;
-      counts[key].commentCount += (p.comments ? p.comments.length : 0);
-    });
-
-    response.status(200).send(counts);
-  } catch (err) {
-    console.error("Error in /user/counts:", err);
-    response.status(500).send(JSON.stringify(err));
-  }
-});
-/** ------------- END NEW ROUTE ------------- */
 
 /**
  * GET /user/:id
@@ -417,6 +419,49 @@ app.get("/photosOfUser/:id", async (req, res) => {
   } catch (err) {
     console.error("Error in /photosOfUser/:id:", err);
     res.status(500).send(JSON.stringify(err));
+  }
+});
+
+/**
+ * GET /commentsOfUser/:id
+ * Returns all comments authored by a given user,
+ * with info about the photo for thumbnails.
+ */
+app.get("/commentsOfUser/:id", async (request, response) => {
+  const id = request.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return response.status(400).send("Bad user id");
+  }
+
+  try {
+    const user = await User.findById(id).exec();
+    if (!user) {
+      return response.status(400).send("User not found");
+    }
+
+    const photos = await Photo.find({ "comments.user_id": id }).lean().exec();
+
+    const results = [];
+    photos.forEach((photo) => {
+      (photo.comments || []).forEach((c) => {
+        if (String(c.user_id) === String(id)) {
+          results.push({
+            _id: c._id,
+            comment: c.comment,
+            date_time: c.date_time,
+            photo_id: photo._id,
+            photo_file_name: photo.file_name,
+            photo_user_id: photo.user_id,
+          });
+        }
+      });
+    });
+
+    response.status(200).send(results);
+  } catch (err) {
+    console.error("Error in /commentsOfUser/:id:", err);
+    response.status(500).send(JSON.stringify(err));
   }
 });
 
