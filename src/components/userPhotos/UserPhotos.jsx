@@ -18,6 +18,38 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CommentIcon from '@mui/icons-material/Comment';
 import axios from 'axios';
 
+// Turn URLs in comment text into clickable links.
+const renderCommentText = (text) => {
+  if (!text) return null;
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    // If this part matches the URL regex, render it as a link
+    if (urlRegex.test(part)) {
+      // reset regex state so multiple matches work correctly
+      urlRegex.lastIndex = 0;
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#1976d2", textDecoration: "underline" }}
+          // prevent clicking the link from triggering the Paper's onClick (which navigates to the user)
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    // Normal text chunk
+    return <span key={index}>{part}</span>;
+  });
+};
+
+
 function UserPhotos() {
   const { userId } = useParams();
   const navigate = useNavigate();
